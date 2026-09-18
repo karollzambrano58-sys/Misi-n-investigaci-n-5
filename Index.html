@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Misión Investigación</title>
+<style>
+:root{--bg:#0f1020;--card:#191b31;--card2:#222541;--text:#f5f6ff;--muted:#b9bdd5;--accent:#9b7cff;--good:#35d39a;--bad:#ff6b7a;--gold:#ffd166}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:linear-gradient(135deg,#0f1020,#19142d);color:var(--text);min-height:100vh}
+.wrap{width:min(720px,94%);margin:auto;padding:24px 0 40px}.screen{background:var(--card);border:1px solid #303451;border-radius:24px;padding:24px;box-shadow:0 12px 35px #0005}
+h1,h2{margin-top:0}.hero{text-align:center;padding:34px 20px}.hero .icon{font-size:58px}.hero h1{font-size:32px;margin:10px 0}.hero p{color:var(--muted);line-height:1.6}
+button{border:0;border-radius:14px;padding:14px 18px;font-size:16px;font-weight:700;cursor:pointer;min-height:48px}
+.primary{background:var(--accent);color:white;width:100%;margin-top:18px}.option{background:var(--card2);color:var(--text);width:100%;text-align:left;margin:7px 0;border:1px solid #363a59}.option:hover{border-color:var(--accent)}.option.correct{background:#174d3c;border-color:var(--good)}.option.wrong{background:#562631;border-color:var(--bad)}
+.hidden{display:none!important}.top{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap}.pill{background:var(--card2);padding:9px 12px;border-radius:999px;font-size:14px}.bar{height:9px;background:#30334d;border-radius:9px;overflow:hidden;margin:10px 0 22px}.bar i{display:block;height:100%;background:var(--accent);width:0%;transition:.3s}
+.level{color:var(--gold);font-weight:800;font-size:14px;text-transform:uppercase;letter-spacing:.5px}.case{background:#121426;border-left:4px solid var(--accent);padding:15px;border-radius:12px;margin:15px 0;color:#dfe2f5;line-height:1.55}
+.feedback{margin-top:14px;padding:14px;border-radius:12px;background:#111426;line-height:1.5}.next{width:100%;margin-top:12px;background:#fff;color:#17182a}.next:disabled{opacity:.45;cursor:not-allowed}
+.explanation{background:var(--card2);padding:16px;border-radius:16px;margin:12px 0;line-height:1.55;border:1px solid #363a59}.explanation strong{color:var(--gold)}
+.small{font-size:13px;color:var(--muted)}.danger{color:#ff9aa5}.score{font-size:26px;color:var(--gold);font-weight:800}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<section id="start" class="screen hero">
+  <div class="icon">🔎🎓</div>
+  <h1>Misión: Investigación</h1>
+  <p>Un reto universitario sobre <b>planteamiento del problema</b> y <b>análisis bibliométrico cualitativo y cuantitativo</b>.</p>
+  <p><b>3 niveles · dificultad creciente · 3 vidas</b></p>
+  <p class="small">Cada partida selecciona investigaciones y mezcla preguntas y respuestas, así que dos jugadores pueden recibir combinaciones diferentes.</p>
+  <button class="primary" id="begin">🚀 Comenzar misión</button>
+</section>
+
+<section id="game" class="screen hidden">
+  <div class="top">
+    <span class="pill" id="levelPill">Nivel 1</span>
+    <span class="pill">❤️ Vidas: <b id="lives">3</b></span>
+    <span class="pill">⭐ Puntos: <b id="score">0</b></span>
+  </div>
+  <div class="bar"><i id="progress"></i></div>
+  <div class="level" id="difficulty">Nivel 1 · Explorador</div>
+  <h2 id="title"></h2>
+  <div class="case" id="case"></div>
+  <p id="question"></p>
+  <div id="options"></div>
+  <div id="feedback" class="feedback hidden" aria-live="polite"></div>
+  <button class="next" id="next" disabled>Siguiente</button>
+</section>
+
+<section id="end" class="screen hidden">
+  <div class="hero" style="padding:10px 0">
+    <div class="icon" id="endIcon">🏆</div>
+    <h1 id="endTitle">¡Misión completada!</h1>
+    <p id="endText"></p>
+    <div class="score" id="finalScore"></div>
+  </div>
+  <h2>📚 Explicación de las investigaciones</h2>
+  <p class="small">Aquí puedes revisar qué se investigaba, cuál era el problema y cómo se aplicaba el análisis bibliométrico.</p>
+  <div id="explanations"></div>
+  <button class="primary" id="again">🔄 Jugar otra partida</button>
+</section>
+
+</div>
+
+<script>
+const banks=[
+{
+ level:1,difficulty:"Nivel 1 · Explorador",points:20,
+ cases:[
+ {title:"Investigación A · Hábitos digitales",case:"Una universidad quiere comprender si el uso de redes sociales está relacionado con los hábitos de estudio de sus estudiantes. La revisión inicial encuentra muchos artículos, pero no se ha organizado su producción científica.",
+ qs:[
+  ["¿Cuál sería un problema de investigación adecuado?",["Hay muchos estudiantes que usan redes sociales.","No está suficientemente claro cómo se relacionan determinados hábitos digitales con los hábitos de estudio en la población definida.","Las redes sociales existen desde hace años.","Los estudiantes tienen teléfonos."],1,"El problema debe presentar una situación investigable y un vacío o necesidad de conocimiento."],
+  ["¿Qué dato sirve para un análisis bibliométrico cuantitativo?",["Número de publicaciones por año.","Opinión personal del investigador.","Color de las portadas.","Una interpretación de los autores."],0,"El número de publicaciones por año es un dato numérico que permite observar tendencias."],
+  ["Si se agrupan los temas más repetidos de los artículos, se realiza principalmente un análisis...",["Cualitativo.","Geográfico únicamente.","Financiero.","Experimental."],0,"Agrupar e interpretar temas y categorías corresponde al componente cualitativo."],
+  ["¿Qué pregunta está mejor delimitada?",["¿Qué pasa con la tecnología?","¿Cómo se relacionan ciertos hábitos digitales con los hábitos de estudio de estudiantes universitarios de la población seleccionada?","¿Por qué existe internet?","¿La tecnología es buena o mala?"],1,"Una buena pregunta delimita fenómeno, población y relación que se desea estudiar."],
+  ["¿Para qué sirve revisar investigaciones anteriores?",["Para copiar conclusiones.","Para conocer qué se ha estudiado e identificar vacíos que orienten el nuevo estudio.","Para evitar formular objetivos.","Para reemplazar el trabajo de campo."],1,"La revisión permite conocer antecedentes, conceptos, métodos y vacíos de investigación."]
+ ]},
+ {title:"Investigación B · Educación virtual",case:"Una institución observa dificultades de permanencia en cursos virtuales. Quiere revisar la literatura para conocer qué factores se han estudiado y cuáles necesitan mayor investigación.",
+ qs:[
+  ["¿Qué elemento ayuda a justificar el problema?",["Una situación observable y un vacío de conocimiento respaldado por antecedentes.","El gusto del investigador por el tema.","Un título llamativo.","La cantidad de colores de una presentación."],0,"La justificación se fortalece al conectar una situación real con evidencia y un vacío investigable."],
+  ["¿Cuál es un indicador cuantitativo bibliométrico?",["Número de citas recibidas por un artículo.","El significado de una entrevista.","La interpretación de una categoría.","La opinión del lector."],0,"Las citas son datos cuantificables utilizados en estudios bibliométricos."],
+  ["¿Qué permite observar una serie de publicaciones de 2020 a 2025?",["La evolución temporal de la producción científica.","La personalidad de los autores.","La verdad absoluta del tema.","El contenido emocional de cada artículo."],0,"Comparar publicaciones por año permite analizar tendencias temporales."],
+  ["¿Qué corresponde a una lectura cualitativa?",["Interpretar los temas, enfoques y categorías presentes en los estudios.","Sumar únicamente el número de autores.","Ordenar artículos por año.","Calcular porcentajes sin interpretar."],0,"El análisis cualitativo busca comprender patrones temáticos y conceptuales."],
+  ["¿Qué debe hacer el objetivo general?",["Expresar qué se pretende lograr frente al problema planteado.","Repetir literalmente la introducción.","Incluir todos los resultados antes de investigar.","Cambiar el tema."],0,"El objetivo general orienta la investigación y debe guardar coherencia con el problema."]
+ ]}
+ ]},
+{
+ level:2,difficulty:"Nivel 2 · Analista",points:30,
+ cases:[
+ {title:"Investigación A · Salud mental universitaria",case:"En una revisión sobre bienestar emocional universitario aparecen cientos de artículos. Algunos estudian estrés, otros apoyo social y otros rendimiento. El equipo necesita encontrar patrones y vacíos.",
+ qs:[
+  ["Si se registra cuántos artículos existen por país, ¿qué tipo de análisis es?",["Cuantitativo.","Cualitativo únicamente.","Narrativo.","Experimental."],0,"Contabilizar artículos por país produce una distribución numérica."],
+  ["Si se analizan las relaciones entre estrés, apoyo social y rendimiento según los enfoques de los artículos, se busca...",["Interpretar relaciones temáticas y conceptuales.","Contar páginas solamente.","Eliminar palabras clave.","Medir el tamaño de las revistas."],0,"La interpretación de relaciones entre conceptos pertenece al análisis cualitativo."],
+  ["La revisión muestra que casi no existen estudios que integren los tres factores en una población concreta. Esto puede ser...",["Un vacío de investigación.","Una prueba de que el tema no existe.","Un resultado final.","Un indicador de citación."],0,"La escasez de estudios sobre una relación o contexto específico puede constituir un vacío."],
+  ["¿Cuál fuente de información sería útil para comparar producción científica?",["Año de publicación, autores, palabras clave y número de citas.","Solo el color de la portada.","Solo el nombre del archivo.","El tamaño de la pantalla."],0,"Esos metadatos permiten construir diferentes indicadores y análisis bibliométricos."],
+  ["¿Qué combinación representa mejor un enfoque mixto de la revisión?",["Contar patrones bibliométricos y después interpretar los temas y relaciones encontrados.","Leer un solo artículo.","Contar palabras sin interpretar.","Interpretar una opinión sin revisar literatura."],0,"El componente cuantitativo identifica patrones numéricos y el cualitativo ayuda a interpretarlos."]
+ ]},
+ {title:"Investigación B · Inteligencia artificial en el aula",case:"Un grupo universitario revisa cómo se ha investigado la inteligencia artificial en educación. Encuentra un crecimiento acelerado de publicaciones y cambios en las palabras clave utilizadas.",
+ qs:[
+  ["¿Qué pregunta bibliométrica cuantitativa es pertinente?",["¿Cómo ha cambiado el número de publicaciones sobre IA educativa por año?","¿Qué siente cada autor?","¿Qué color tiene cada revista?","¿Cuál artículo es más bonito?"],0,"La evolución del número de publicaciones es una pregunta cuantitativa."],
+  ["¿Qué puede indicar la aparición frecuente de nuevas palabras clave?",["Cambios o nuevas líneas temáticas dentro del campo.","Que todos los artículos tienen la misma metodología.","Que las citas dejan de importar.","Que no existe producción científica."],0,"Las palabras clave pueden ayudar a identificar tendencias y nuevos temas."],
+  ["¿Qué sería un vacío contextual?",["Pocos estudios sobre IA educativa en la población o contexto específico que interesa.","Muchos artículos de otros países.","Un artículo con título corto.","Una revista con muchas páginas."],0,"El vacío contextual se refiere a lo poco estudiado en una población, región o contexto concreto."],
+  ["¿Por qué comparar periodos de publicación?",["Para detectar cambios y tendencias en la producción científica.","Para decidir qué autor tiene razón.","Para eliminar estudios antiguos automáticamente.","Para evitar formular preguntas."],0,"La comparación temporal permite observar crecimiento, disminución o cambios de tendencia."],
+  ["¿Qué conclusión sería más prudente?",["Los datos muestran una tendencia de crecimiento; se requiere interpretar qué temas explican ese cambio.","La IA resolverá todos los problemas educativos.","Más artículos significa automáticamente mejores investigaciones.","Un solo indicador demuestra toda la calidad científica."],0,"Los indicadores muestran patrones, pero no permiten por sí solos afirmar que una investigación es mejor o que un problema está resuelto."]
+ ]}
+ ]},
+{
+ level:3,difficulty:"Nivel 3 · Investigador experto",points:40,
+ cases:[
+ {title:"Investigación A · Vacíos y redes de conocimiento",case:"Un equipo analiza 1.200 documentos sobre innovación educativa. Detecta autores que colaboran entre sí, palabras clave que aparecen juntas y temas poco estudiados. Ahora debe integrar los hallazgos para formular un problema sólido.",
+ qs:[
+  ["¿Qué análisis cuantitativo permite estudiar colaboración entre autores?",["Contar y representar patrones de coautoría.","Interpretar únicamente los títulos.","Leer opiniones de estudiantes.","Clasificar artículos por color."],0,"La coautoría puede analizarse mediante datos numéricos y redes de colaboración."],
+  ["¿Qué aporta el análisis de coocurrencia de palabras clave?",["Identifica términos que aparecen juntos y ayuda a visualizar relaciones temáticas.","Demuestra que una teoría es verdadera.","Elimina los artículos duplicados automáticamente.","Mide la personalidad de los autores."],0,"La coocurrencia muestra relaciones entre términos y ayuda a detectar estructuras temáticas."],
+  ["Si un tema aparece muy poco en la literatura pero es relevante para el contexto estudiado, ¿qué debe hacerse?",["Revisar críticamente el vacío y justificar por qué merece ser investigado.","Afirmar inmediatamente que nadie lo ha estudiado en el mundo.","Ignorarlo.","Inventar artículos."],0,"Un vacío debe comprobarse mediante una revisión suficiente y relacionarse con la relevancia del problema."],
+  ["¿Qué integra mejor los resultados?",["Los indicadores muestran patrones de producción y las categorías temáticas ayudan a explicar qué se está investigando y qué falta explorar.","Solo el número total de artículos.","Solo una opinión del investigador.","Solo una lista de referencias."],0,"La integración permite pasar de números y redes a una interpretación fundamentada del campo."],
+  ["¿Cuál planteamiento es más sólido?",["Existe una situación relevante, la literatura muestra un vacío específico y se formula una pregunta delimitada para estudiarlo.","El tema es importante porque sí.","Hay muchos artículos, por eso hay que investigar.","La investigación debe comprobar que el investigador tiene razón."],0,"Un planteamiento sólido conecta situación, antecedentes, vacío, delimitación y pregunta investigable."]
+ ]},
+ {title:"Investigación B · Cambio climático y educación",case:"Una revisión bibliométrica reúne estudios sobre educación y cambio climático. La producción aumenta, pero los temas se concentran en educación ambiental general y existen pocos estudios sobre competencias específicas en estudiantes universitarios de una región.",
+ qs:[
+  ["¿Cuál hallazgo combina dimensión cuantitativa y cualitativa?",["Aumentan las publicaciones y, al analizar sus temas, se observa concentración en educación ambiental general.","Solo hay muchos artículos.","Un artículo tiene cinco autores.","Una revista cambió su diseño."],0,"El crecimiento es cuantitativo y la concentración temática surge del análisis cualitativo."],
+  ["¿Qué vacío está mejor delimitado?",["La escasez de estudios sobre competencias específicas relacionadas con cambio climático en la población y región seleccionadas.","No existe investigación sobre cambio climático.","Nadie en el mundo ha estudiado educación ambiental.","El tema es demasiado grande."],0,"El vacío debe formularse con precisión; una delimitación contextual evita afirmaciones absolutas sin evidencia."],
+  ["¿Qué objetivo sería coherente?",["Analizar cómo se ha abordado el desarrollo de competencias específicas sobre cambio climático en la población delimitada, a partir de la literatura disponible.","Demostrar que el investigador tiene razón.","Leer todos los artículos del mundo.","Solucionar el cambio climático."],0,"El objetivo debe ser alcanzable y responder al problema y vacío identificado."],
+  ["¿Qué riesgo existe al interpretar solo el número de citas?",["Usarlo como único criterio puede ocultar diferencias de contexto, antigüedad, disciplina y otros factores.","No existe ningún riesgo.","Las citas siempre miden exactamente la calidad.","Las citas reemplazan el análisis temático."],0,"Los indicadores bibliométricos necesitan contexto e interpretación; un solo indicador no explica todo el campo."],
+  ["¿Cuál sería la mejor síntesis final?",["La revisión evidencia crecimiento de la producción y predominio de ciertos temas, mientras persiste un vacío contextual que puede orientar una nueva investigación.","Como hay muchas publicaciones, ya no hay nada por investigar.","El artículo más citado siempre es el correcto.","Los números hacen innecesaria la interpretación."],0,"Una síntesis útil relaciona tendencias, temas, limitaciones y vacíos sin convertir un indicador aislado en una conclusión absoluta."]
+ ]}
+ ]}
+];
+
+function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+
+let lives=3,score=0,levelIndex=0,qIndex=0,selected=[],current=null,answered=false,seenCases=[];
+
+const $=id=>document.getElementById(id);
+
+function prepare(){
+  selected=banks.map(bank=>{
+    const chosen=shuffle(bank.cases)[0];
+    seenCases.push(chosen);
+    const qs=shuffle(chosen.qs).map(q=>{
+      const opts=q[1].map((text,index)=>({text,index}));
+      const mixed=shuffle(opts);
+      return {q:q[0],opts:mixed.map(x=>x.text),a:mixed.findIndex(x=>x.index===q[2]),e:q[3]};
+    });
+    return {...bank,case:chosen,qs};
+  });
+}
+
+function render(){
+  current=selected[levelIndex];
+  const item=current.qs[qIndex];
+  $("levelPill").textContent=`Nivel ${current.level} de 3`;
+  $("difficulty").textContent=current.difficulty;
+  $("title").textContent=current.case.title;
+  $("case").textContent=current.case.case;
+  $("question").textContent=item.q;
+  $("lives").textContent=lives;
+  $("score").textContent=score;
+  $("progress").style.width=((levelIndex*5+qIndex+1)/15*100)+"%";
+  $("options").innerHTML="";
+  $("feedback").className="feedback hidden";
+  $("next").disabled=true;
+  answered=false;
+  item.opts.forEach((opt,n)=>{
+    const b=document.createElement("button");
+    b.className="option";b.textContent=opt; b.type="button";
+    b.addEventListener("click",()=>answer(n,b));
+    $("options").appendChild(b);
+  });
+}
+
+function answer(n,b){
+  if(answered)return;
+  answered=true;
+  const item=current.qs[qIndex];
+  document.querySelectorAll(".option").forEach((x,k)=>{
+    x.disabled=true;if(k===item.a)x.classList.add("correct");
+  });
+  if(n===item.a){
+    score+=current.points;
+    b.classList.add("correct");
+    $("feedback").textContent=`✅ ¡Correcto! +${current.points} puntos. ${item.e}`;
+  }else{
+    lives--;
+    b.classList.add("wrong");
+    $("feedback").textContent=`❌ Respuesta incorrecta. Pierdes una vida. ${item.e}`;
+  }
+  $("lives").textContent=lives;$("score").textContent=score;
+  $("feedback").className="feedback";
+  $("next").disabled=false;
+}
+
+function finish(win){
+  $("game").classList.add("hidden");$("end").classList.remove("hidden");
+  $("finalScore").textContent=`${score} puntos · ${lives} vida${lives===1?"":"s"} restante${lives===1?"":"s"}`;
+  if(win){
+    $("endIcon").textContent="🏆";
+    $("endTitle").textContent="¡Completaste los 3 niveles!";
+    $("endText").textContent="Superaste investigaciones de dificultad creciente. Revisa las explicaciones para reforzar lo aprendido.";
+  }else{
+    $("endIcon").textContent="🔎";
+    $("endTitle").textContent="Te quedaste sin vidas";
+    $("endText").textContent="La misión termina aquí. Revisa las explicaciones y vuelve a intentarlo con una nueva combinación de investigaciones.";
+  }
+  $("explanations").innerHTML="";
+  seenCases.forEach((c,idx)=>{
+    const box=document.createElement("div");box.className="explanation";
+    box.innerHTML=`<strong>Nivel ${idx+1}: ${c.title}</strong><br>${c.case}<br><br><b>¿Qué se aprendía?</b> El problema parte de una situación concreta y debe relacionarse con antecedentes y vacíos. El análisis bibliométrico cuantitativo permite observar datos como publicaciones, citas, autores o tendencias; el cualitativo permite interpretar temas, categorías, relaciones y vacíos de la literatura.`;
+    $("explanations").appendChild(box);
+  });
+}
+
+$("begin").addEventListener("click",()=>{
+  lives=3;score=0;levelIndex=0;qIndex=0;seenCases=[];
+  prepare();$("start").classList.add("hidden");$("game").classList.remove("hidden");render();
+});
+$("next").addEventListener("click",()=>{
+  if(lives<=0){finish(false);return}
+  if(qIndex<4){qIndex++;render();return}
+  if(levelIndex<2){levelIndex++;qIndex=0;render();return}
+  finish(true);
+});
+$("again").addEventListener("click",()=>{
+  lives=3;score=0;levelIndex=0;qIndex=0;seenCases=[];
+  $("end").classList.add("hidden");$("game").classList.remove("hidden");prepare();render();
+});
+</script>
+</body>
+</html>
